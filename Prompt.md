@@ -38,3 +38,11 @@ The AI was explicitly told that the submission must:
 - include a README plus AI prompts and a review/corrections appendix.
 
 The final code was checked against these constraints rather than treating AI output as automatically correct.
+
+## CI debugging request, November 22, 2026
+
+**Tool and model:** OpenAI ChatGPT, GPT-6.
+
+**User's actual request:** "Делал через другую ИИшку, проверь гит хаб — там ошибку дает. Помоги решить проблему" (I used another AI tool; check my GitHub repository, it shows an error, help me fix it). The user supplied a repository URL, screenshots of GitHub Actions, and the full failed Playwright run log.
+
+**Actions:** reviewed the public `ci-setup` source on GitHub, interpreted CI failures, verified the Toolshop API request/response schema, replaced brittle page-object assertions, isolated customer accounts with a fixture, and corrected the workflow matrix to four shards. No live GitHub run was claimed, and any new failing output must be reviewed instead of accepting this suggestion without verification.

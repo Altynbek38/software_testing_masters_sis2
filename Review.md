@@ -108,3 +108,28 @@ The final source was statically checked for the rubric constraints:
 - README and AI appendix present.
 
 Playwright test discovery also succeeds and lists six executable tests across the five required spec files.
+
+### Correction 11 — Replaced the invalid cart title selector found during parallel execution
+
+A full `npx playwright test` run with six parallel workers exposed one remaining issue in the purchase flow: the draft waited for `data-test="product-title"`, which is not present on the current cart page. Five other tests passed in the same parallel run.
+
+The cart page object was corrected to wait for the known cart-step control (`proceed-1`) and to verify the selected cart item semantically by its visible product name and the quantity input in that product row. The product page also waits for the cart badge to reflect the added item before navigation.
+
+**Why:** this fixes the selector against the current sprint without adding a fixed delay, keeps all DOM knowledge inside Page Objects, and preserves the required assertion that the cart contains the correct item with quantity `1`.
+
+### Correction 12 — Removed Locator objects from spec-level assertions
+
+The final review interpreted “No locator anywhere in a spec file” strictly. Specs no longer receive Locator objects such as `loginPage.accountMenu` or `checkoutPage.successMessage`. Page Objects now expose business-level methods that return booleans, text, or structured values, and the specs assert those plain values.
+
+**Why:** this makes the separation between test intent and UI implementation unambiguous and avoids even indirect Locator usage in spec files.
+
+## CI round: corrections after the first GitHub Actions run (2026-11-22)
+
+- The initial `ci-setup` workflow exercised only a single shard (`1/1`) despite the four-shard assignment requirement. The workflow matrix was updated to run four shards in parallel and merge their blob reports.
+- CI's registration scenario reached `/auth/login` on a retry, but the test expected the nonexistent `data-test="login-form"` attribute. A page-object method now uses web-first URL and **real email/password field** assertions.
+- Valid login and checkout both timed out on `data-test="nav-menu"`, so the presence of that UI element was not proof of why authentication failed. A `waitForAccountPage()` page-object method now checks the required `/account` URL and includes the application's login-error text in failures. This does not mask failed authentication.
+- Shared seeded accounts can change state. The Toolshop OpenAPI explicitly describes its forgot-password operation as changing the selected user's password. The `registeredCustomer` fixture now uses a fresh API-created account for the valid login, checkout and positive password-reset cases. These tests remain independent and continue to exercise the UI for their core behaviours.
+- `data-test` selectors remain inside page objects; test specifications assert plain returned values. No fixed sleeps were added.
+- A static test discovery run found six test cases; **a passing live GitHub Actions run is still required** before a final completion claim.
+
+Sources consulted: official API schema at `https://api.practicesoftwaretesting.com/docs`, the existing `ci-setup` files, and the failing GitHub Actions console log. AI tool: OpenAI ChatGPT GPT-6. Reviewer must confirm the eventual GitHub run, screenshots/traces, and actual timing table values.
