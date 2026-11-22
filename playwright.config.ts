@@ -4,21 +4,27 @@ const isCI = !!process.env.CI;
 
 export default defineConfig({
   testDir: './tests',
-  fullyParallel: true, // shards split tests, not whole files
-  forbidOnly: isCI,    // a forgotten test.only fails CI
-  retries: isCI ? 2 : 0, // a flaky test is marked flaky, not red
-  workers: isCI ? 2 : undefined, // GitHub runners have 2-4 vCPUs
+  fullyParallel: true,
+  forbidOnly: isCI,
+  retries: isCI ? 2 : 0,
+  workers: isCI ? 2 : undefined,
+  timeout: isCI ? 60_000 : 30_000, // Общий таймаут теста в CI — 60 сек
+  expect: {
+    timeout: isCI ? 20_000 : 10_000, // Ждем ответа API/редиректа до 20 сек вместо 5
+  },
   reporter: isCI
     ? [
         ['list'],
-        ['blob'], // for merging shards
+        ['blob'],
         ['junit', { outputFile: 'reports/junit.xml' }],
       ]
     : [['list'], ['html', { open: 'on-failure' }]],
   use: {
     baseURL: process.env.BASE_URL || 'https://practicesoftwaretesting.com',
     testIdAttribute: 'data-test',
-    trace: 'on-first-retry', // trace recorded on the first retry
+    actionTimeout: isCI ? 15_000 : 10_000,
+    navigationTimeout: isCI ? 30_000 : 15_000,
+    trace: 'on-first-retry',
     screenshot: 'only-on-failure',
     video: 'retain-on-failure',
   },
