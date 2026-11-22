@@ -46,3 +46,25 @@ The final code was checked against these constraints rather than treating AI out
 **User's actual request:** "Делал через другую ИИшку, проверь гит хаб — там ошибку дает. Помоги решить проблему" (I used another AI tool; check my GitHub repository, it shows an error, help me fix it). The user supplied a repository URL, screenshots of GitHub Actions, and the full failed Playwright run log.
 
 **Actions:** reviewed the public `ci-setup` source on GitHub, interpreted CI failures, verified the Toolshop API request/response schema, replaced brittle page-object assertions, isolated customer accounts with a fixture, and corrected the workflow matrix to four shards. No live GitHub run was claimed, and any new failing output must be reviewed instead of accepting this suggestion without verification.
+
+## Additional ChatGPT requests during CI finishing (2026-11-22)
+
+The following requests are recorded verbatim from the working conversation (spelling preserved):
+
+> Делал через другую ИИшку, проверь гит хаб
+
+> там ршибку дает. Помоги решить проблему
+
+> Что я сделал не правильно?
+
+> что дальше делаем
+
+> Получен зелёный запуск при создании Pull Request
+> [ ] README содержит бейдж main и таблицу 1 shard vs 4 shards
+> [ ] Prompt.md и Review.md отражают использование ИИ и исправления
+> [ ] Ветка main содержит окончательную версию проекта
+> как сделать жти помоги
+
+AI was used to interpret failure logs and results, improve independent-user setup and registration verification, correct the four-shard workflow, and prepare documentation. Actual passing tests and GitHub Actions artifacts were verified separately by the author.
+
+**Submission note:** The initial Gemini prompt above is preserved as recorded in the project. If your instructor requires the *exact original prompt*, compare it with the Gemini conversation and correct any differences before submitting. Do not represent paraphrases as verbatim prompts.

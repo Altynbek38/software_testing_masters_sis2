@@ -97,7 +97,7 @@ Where a semantic role is more appropriate, page objects use `getByRole()`.
 The project contains no `fixed sleep calls`. Synchronisation uses Playwright auto-waiting and web-first assertions such as `toBeVisible`, `toBeEnabled`, `toHaveText`, and `toHaveValue`.
 
 ### Independent and parallel tests
-`fullyParallel: true` is enabled and no fixed worker count is configured. Each Playwright test receives a fresh browser context. Registration generates unique data with `crypto.randomUUID()`, and the reset-password negative case generates a unique unknown email.
+`fullyParallel: true` is enabled. Local runs use Playwright's default worker count; CI configures 2 workers inside each of four parallel shard jobs. Each Playwright test receives a fresh browser context. Registration generates unique data with `crypto.randomUUID()`, and the reset-password negative case generates a unique unknown email.
 
 ### Independent customers created via API
 
@@ -115,6 +115,7 @@ AI assistance was used and is disclosed as required by the assignment.
 
 - `Prompt.md` records the prompts/tasks given to AI tools.
 - `Review.md` documents problems found in AI-generated suggestions and the corrections made before submission.
+- `AI_CI_Appendix.md` records AI use specifically for the GitHub Actions pipeline.
 
 The final suite was reviewed against the assignment rules rather than accepting generated code unchanged.
 
@@ -137,16 +138,26 @@ Workflow (`.github/workflows/playwright.yml`) triggers on **every push**, **pull
 
 In CI, `playwright.config.ts` enables `forbidOnly`, two retries, and the `list`, `blob`, and `junit` reporters. HTML and JUnit reports are uploaded even if some tests fail.
 
+### Verified GitHub Actions result (2026-11-22)
+
+The successful **push** run on `ci-setup` (workflow run **#5**, commit `50382e4`) completed in **49 seconds** according to the GitHub Actions run list. The screenshots of the merged Playwright HTML and JUnit artifacts show **6 passed, 0 failed**. All four test shards and the merge job were green in this push run.
+
+The HTML report's **8.8-second** figure describes test results in the merged report; it is **not** the full GitHub Actions workflow duration (49 seconds).
+
+**Direct run link to insert:** Open **Actions → Playwright Tests → fix: assert registration API success in CI**, copy the URL from the address bar, and replace the placeholder below.
+
 ### CI runtime comparison
 
-Fill the following table with **actual GitHub Actions results and run links** after obtaining one run with a single shard and another with four shards. Failed runs must not be represented as successful timing results.
+For a fair baseline, run the same corrected code in a separate temporary branch named `ci-baseline`, changing only the shard matrix to `shardIndex: [1]` and `shardTotal: [1]`. Do not use an older failed one-shard run as a successful baseline.
 
-| Configuration | Total run time | Slowest Run Playwright tests step | GitHub Actions run |
+| Configuration | Total workflow time | Slowest `Run Playwright tests` step | GitHub Actions run |
 |---|---|---|---|
-| 1 shard | Not measured on a successful run yet | — | Add run link |
-| 4 shards + merge | Not measured on a successful run yet | — | Add run link |
+| 1 shard (successful baseline) | **61 s** | **47 s** | **https://github.com/Altynbek38/software_testing_masters_sis2/actions/runs/45026523009L** |
+| 4 shards + merge (successful push, 2026-11-22) | **49 s** | **34 s** | **https://github.com/Altynbek38/software_testing_masters_sis2/actions/runs/45025619161** |
 
-Runtime may not improve substantially for six short tests, because runner provisioning and Chromium installation occur separately in every shard. Report the actual result even if the sharded workflow takes longer overall.
+**Timing conclusion:** Fill in after the successful one-shard baseline is available. For this small six-test suite, setup and browser installation overhead can dominate the overall time; sharding does not guarantee a shorter total workflow.
+
+**Pull Request evidence:** After opening a PR from `ci-setup` into `main`, record the direct link to the successful **pull_request** workflow run here: **PASTE_PR_RUN_URL**. A push run alone is not evidence of the PR trigger.
 
 ### Local CI-mode check
 
@@ -159,4 +170,4 @@ npx playwright test
 set CI=
 ```
 
-> The badge is for `main`; it becomes meaningful after the workflow is merged into main and has run there. The CI scenario is not submission-ready until all four shards are green, actual run links are recorded, and the timing comparison is completed.
+> The badge refers to `main`; it will reflect the new workflow only after the PR is merged and `main` has run. Before submission, replace the run-link placeholders above, complete the one-shard timing baseline and verify a successful PR-triggered run.

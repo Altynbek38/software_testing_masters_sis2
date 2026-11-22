@@ -76,14 +76,14 @@ Product navigation and extraction are now performed through `ProductPage.getProd
 
 A dedicated `ForgotPasswordPage` was added. The reset-password test now submits:
 
-1. a known seeded email and verifies a confirmation state;
+1. the email of a fresh, API-registered test account and verifies a confirmation state;
 2. a unique unknown email and verifies a different non-empty error state.
 
 **Why:** the assignment requires both the known-email confirmation and invalid/unknown-email error behaviour.
 
 ### Correction 9 — Enabled independent parallel execution
 
-The config now uses `fullyParallel: true` and no longer sets `workers: 1`.
+The config now uses `fullyParallel: true` and does not force a single worker. GitHub Actions runs four shard jobs, with two Playwright workers configured inside each CI job.
 
 **Why:** the assignment requires tests to pass in any order and in parallel. A forced single worker would hide shared-state problems instead of satisfying the requirement.
 
@@ -130,6 +130,16 @@ The final review interpreted “No locator anywhere in a spec file” strictly. 
 - Valid login and checkout both timed out on `data-test="nav-menu"`, so the presence of that UI element was not proof of why authentication failed. A `waitForAccountPage()` page-object method now checks the required `/account` URL and includes the application's login-error text in failures. This does not mask failed authentication.
 - Shared seeded accounts can change state. The Toolshop OpenAPI explicitly describes its forgot-password operation as changing the selected user's password. The `registeredCustomer` fixture now uses a fresh API-created account for the valid login, checkout and positive password-reset cases. These tests remain independent and continue to exercise the UI for their core behaviours.
 - `data-test` selectors remain inside page objects; test specifications assert plain returned values. No fixed sleeps were added.
-- A static test discovery run found six test cases; **a passing live GitHub Actions run is still required** before a final completion claim.
+- A static test discovery run found six test cases. A subsequent live push run of GitHub Actions (**#5**, commit `50382e4`) passed with all four shards and the merge job green. The merged JUnit and HTML reports confirm **6 tests, 0 failures**, as shown in the author-provided screenshots. A PR-triggered run and a successful single-shard timing baseline must still be recorded.
 
 Sources consulted: official API schema at `https://api.practicesoftwaretesting.com/docs`, the existing `ci-setup` files, and the failing GitHub Actions console log. AI tool: OpenAI ChatGPT GPT-6. Reviewer must confirm the eventual GitHub run, screenshots/traces, and actual timing table values.
+
+## Final CI results and evidence (2026-11-22)
+
+- Earlier CI run: registration failed in a test that checked for a login-page `data-test="email"` locator after form submission. This check was not the strongest proof of successful registration and was inconsistent on the Linux runner.
+- Correction: `RegisterPage.submit()` now captures the actual `POST /users/register` response, requires HTTP **201**, and verifies that the user reaches `/auth/login`. The test asserts the returned status and final URL.
+- Four-shard workflow was enabled with `shardIndex: [1, 2, 3, 4]` and `shardTotal: [4]`, while the merge job combines blob reports into HTML and JUnit artifacts.
+- Confirmed in the screenshot of green GitHub Actions push run **#5** (`ci-setup`, commit `50382e4`): four shard jobs and report merge completed successfully. Total workflow duration shown: **49 seconds**.
+- Confirmed in downloaded reports: merged JUnit summary shows `tests="6"`, `failures="0"`, `skipped="0"`, `errors="0"`; HTML report lists all six tests as passed.
+
+**Open evidence tasks:** Capture the direct run URL for this green push, obtain a successful `pull_request`-triggered run, measure a successful one-shard baseline with the same source, record actual run-step durations, and verify the workflow after merging into `main`. These must not be claimed as complete until confirmed.

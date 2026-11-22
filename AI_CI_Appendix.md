@@ -1,4 +1,4 @@
-# AI Usage Appendix (CI/CD Pipeline - SIS 3)
+# AI Usage Appendix (SIS 2 CI/CD Pipeline)
 
 ## 1. Model Used
 * **Model:** Google Gemini 4 Argon
@@ -22,3 +22,16 @@
 
 3. **Artifact Upload Condition (`if: ${{ !cancelled() }}`):**
    * *Justification:* Ensured all artifact upload steps and the `merge-reports` job use `if: ${{ !cancelled() }}` instead of default `success()`, guaranteeing that HTML reports and failure traces are still published when a test fails.
+
+## 4. Additional AI-assisted debugging (ChatGPT, GPT-6, 2026-11-22)
+
+After the initial workflow was generated, the author shared GitHub Actions screenshots and failing logs with OpenAI ChatGPT (GPT-6) and asked for help fixing the failures. Main changes made and reviewed:
+
+1. A fresh, independently registered user is used by UI login, checkout and positive reset-password tests rather than modifying shared seeded accounts.
+2. A brittle registration assertion against login-form elements was replaced with proof of HTTP **201** from `POST /users/register` plus a redirect to `/auth/login`.
+3. The workflow matrix was corrected from one shard to four shards, with a separate merged HTML + JUnit report job.
+4. Assertion failures and network issues were investigated using GitHub Actions logs and Playwright reports instead of only increasing timeouts.
+
+**Observed evidence:** GitHub Actions push run #5 (2026-11-22, `ci-setup`, commit `50382e4`) was green, and the merged JUnit report contained six tests with zero failures. The author's screenshots show the HTML report at 6 passed and the full workflow time at 49 seconds. A PR-triggered success and a one-shard success/timing comparison are separate tasks to verify before final submission.
+
+**Model disclosure check:** The earlier Gemini model label is reproduced from the author's original appendix. Confirm its exact model name and the recorded prompt wording against the original Gemini chat before submission.
