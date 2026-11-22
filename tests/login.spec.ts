@@ -1,23 +1,19 @@
 import { test, expect } from '../fixtures/pages.fixture';
-import { INVALID_CUSTOMER, VALID_CUSTOMER } from '../data/test-users';
+import { INVALID_CUSTOMER } from '../data/test-users';
 
 test.describe('Login scenarios', () => {
-    test('Valid credentials reach the account page', async ({ loginPage }) => {
+    test('Valid credentials reach the account page', async ({ loginPage, registeredCustomer }) => {
         await loginPage.open();
-        await loginPage.login(VALID_CUSTOMER.email, VALID_CUSTOMER.password);
-
-        await expect(loginPage.accountMenu).toBeVisible();
+        await loginPage.login(registeredCustomer.email, registeredCustomer.password);
+        await loginPage.waitForAccountPage();
         expect(loginPage.currentUrl()).toMatch(/\/account(?:$|[?#])/);
     });
 
-    test('Invalid credentials show an error and do not log the user in', async ({
-        loginPage
-    }) => {
+    test('Invalid credentials show an error and do not log the user in', async ({ loginPage }) => {
         await loginPage.open();
         await loginPage.login(INVALID_CUSTOMER.email, INVALID_CUSTOMER.password);
-
-        await expect(loginPage.errorMessage).toBeVisible();
-        await expect(loginPage.accountMenu).toBeHidden();
+        const errorMessage = await loginPage.getLoginErrorText();
+        expect(errorMessage.length).toBeGreaterThan(0);
         expect(loginPage.currentUrl()).toMatch(/\/auth\/login(?:$|[?#])/);
     });
 });

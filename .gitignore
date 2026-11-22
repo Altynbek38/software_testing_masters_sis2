@@ -1,15 +1,8 @@
-# Dependencies
 node_modules/
-
-# Playwright generated output
-/test-results/
-/playwright-report/
-/blob-report/
-/playwright/.cache/
-/playwright/.auth/
-
-# OS / editor files
-.DS_Store
-Thumbs.db
-.vscode/
-.idea/
+test-results/
+playwright-report/
+blob-report/
+reports/
+all-blob-reports/
+.act-artifacts/
+.secrets
