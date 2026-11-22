@@ -39,7 +39,30 @@ export class RegisterPage extends BasePage {
         await this.page.getByTestId('password').fill(user.password);
     }
 
-    async submit(): Promise<void> {
+    async submit(): Promise<{ status: number; finalUrl: string }> {
+        // Start waiting before clicking so that even fast responses are captured.
+        const responsePromise = this.page.waitForResponse(
+            (response) =>
+                response.request().method() === 'POST' &&
+                /\/users\/register(?:\?|$)/.test(response.url()),
+            { timeout: 20000 }
+        );
+
         await this.page.getByTestId('register-submit').click();
+        const response = await responsePromise;
+
+        if (response.status() !== 201) {
+            const details = await response.text().catch(() => '(body unavailable)');
+            throw new Error(
+                `Registration failed with HTTP ${response.status()}: ${details.slice(0, 800)}`
+            );
+        }
+
+        // The assignment accepts finishing on the login page after registration.
+        await expect(this.page).toHaveURL(/\/auth\/login(?:$|[?#])/, {
+            timeout: 20000
+        });
+
+        return { status: response.status(), finalUrl: this.page.url() };
     }
 }
